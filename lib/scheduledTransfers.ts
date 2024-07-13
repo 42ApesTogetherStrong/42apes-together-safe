@@ -3,7 +3,10 @@ import {
   getInstallScheduledTransfersExecutor,
   getCreateScheduledTransferAction,
 } from "@rhinestone/module-sdk";
-import { getInstallSocialRecoveryValidator } from "@rhinestone/module-sdk";
+import {
+  getInstallSocialRecoveryValidator,
+  getAddSocialRecoveryGuardianAction,
+} from "@rhinestone/module-sdk";
 import { Address } from "viem";
 import { SafeSmartAccountClient } from "./permissionless";
 
@@ -17,6 +20,8 @@ export interface ScheduledTransferDataInput {
 
 export const scheduledTransfersModuleAddress =
   "0xF1aE317941efeb1ffB103D959EF58170F1e577E0";
+export const recoveryModuleAddress =
+  "0x0Ecd5E6721BB885A68B4cbA52B74827994AbD66C";
 const sepoliaUSDCTokenAddress = "0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8";
 
 export const install7579Module = async (
@@ -84,6 +89,29 @@ export const installRecoveryModule = async (
 
   console.log(
     "Recovery module is being installed: https://sepolia.etherscan.io/tx/" +
+      txHash
+  );
+  return txHash;
+};
+
+export const addSocialSignerGuardian = async (
+  safe: SafeSmartAccountClient,
+  addressToAdd: string
+) => {
+  const guardian: Address = "0x2E21f5d32841cf8C7da805185A041400bF15f21A";
+
+  const addGuardian = getAddSocialRecoveryGuardianAction({
+    guardian,
+  });
+
+  const txHash = await safe.sendTransaction({
+    to: addGuardian.target,
+    value: addGuardian.value as bigint,
+    data: addGuardian.callData,
+  });
+
+  console.log(
+    "Successfully added a Recovery Signer to the pack! : https://sepolia.etherscan.io/tx/" +
       txHash
   );
   return txHash;

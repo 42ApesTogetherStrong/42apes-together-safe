@@ -5,7 +5,9 @@ import {
   install7579Module,
   scheduleTransfer,
   scheduledTransfersModuleAddress,
+  recoveryModuleAddress,
   installRecoveryModule,
+  addSocialSignerGuardian,
 } from "@/lib/scheduledTransfers";
 
 const ScheduledTransferForm: React.FC<{ safe: SafeSmartAccountClient }> = ({
@@ -19,33 +21,19 @@ const ScheduledTransferForm: React.FC<{ safe: SafeSmartAccountClient }> = ({
   const [error, setError] = useState(false);
   const [is7579Installed, setIs7579Installed] = useState(false);
 
-  useEffect(() => {
-    const init7579Module = async () => {
-      const isModuleInstalled = await safe
-        .isModuleInstalled({
-          type: "executor",
-          address: scheduledTransfersModuleAddress,
-          context: "0x",
-        })
-        .catch(() => false);
-      if (isModuleInstalled) {
-        setIs7579Installed(true);
-      }
-    };
-    void init7579Module();
-  }, [safe]);
-
   const handleInstallRecovery = async () => {
     setLoading(true);
     setError(false);
     try {
-      const txHash = await installRecoveryModule(
+      const newTxHash = await installRecoveryModule(
         safe,
         "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
       );
-      setTxHash(txHash);
+      if (newTxHash !== txHash) {
+        setTxHash(newTxHash);
+      }
+      setIs7579Installed(true);
       setLoading(false);
-      // Additional state updates as needed
     } catch (err) {
       console.error(err);
       setError(true);
@@ -53,123 +41,108 @@ const ScheduledTransferForm: React.FC<{ safe: SafeSmartAccountClient }> = ({
     }
   };
 
+  const handleAddSocialSignerGuardian = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const newTxHash = await addSocialSignerGuardian(
+        safe,
+        "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+      );
+    } catch (err) {
+      console.error(err);
+      setError(true);
+      setLoading(false);
+    }
+  };
+
+  const baseButtonStyle = {
+    backgroundColor: "#4CAF50", // Green background
+    color: "white", // White text
+    padding: "12px 24px", // Larger padding for better touch target
+    fontSize: "16px", // Larger font size for readability
+    borderRadius: "5px", // Rounded corners
+    border: "none", // No border
+    cursor: "pointer", // Pointer cursor on hover
+    margin: "5px 0", // Margin to separate buttons
+    width: "100%", // Full width buttons for better mobile experience
+    boxSizing: "border-box", // Include padding in width
+  };
+
   return (
     <>
-      <div style={{ marginTop: "40px" }}>Your Safe: {safe.account.address}</div>{" "}
-      <div style={{ marginTop: "10px" }}>
-        ERC-7579 module installed:{" "}
-        {is7579Installed
-          ? "Yes ✅"
-          : "No, schedule a transfer below to install it!"}{" "}
+      <div
+        style={{
+          marginTop: "20px",
+          padding: "0 15px",
+          fontSize: "18px",
+          textAlign: "center",
+        }}
+      >
+        Your Safe: <strong>{safe.account.address}</strong>
       </div>
       <div
         style={{
-          width: "100%",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginTop: "40px",
-          marginBottom: "40px",
+          marginTop: "10px",
+          padding: "0 15px",
+          fontSize: "18px",
+          textAlign: "center",
         }}
       >
-        <div>
-          <label htmlFor="address">Address:</label>
-          <input
-            style={{ marginLeft: "20px" }}
-            id="address"
-            placeholder="0x..."
-            onChange={(e) => setRecipient(e.target.value)}
-            value={recipient}
-          />
-        </div>
-        <div>
-          <label htmlFor="amount">Amount (integer):</label>
-          <input
-            style={{ marginLeft: "20px" }}
-            id="amount"
-            type="number"
-            placeholder="1"
-            min="0"
-            onChange={(e) => setAmount(Number(e.target.value))}
-            value={amount}
-          />
-        </div>
-        <div>
-          <label htmlFor="date">Date/Time:</label>
-          <input
-            style={{ marginLeft: "20px" }}
-            id="date"
-            type="datetime-local"
-            onChange={(e) => setDate(e.target.value)}
-            value={date}
-          />
-        </div>
-
-        <button
-          disabled={!recipient || !amount || !date || loading}
-          onClick={async () => {
-            setLoading(true);
-            setError(false);
-            const startDate = new Date(date).getTime() / 1000;
-            const transferInputData = {
-              startDate: 1710759572,
-              repeatEvery: 60 * 60 * 24,
-              numberOfRepeats: 1,
-              amount,
-              recipient: recipient as `0x${string}`,
-            };
-
-            await (!is7579Installed ? install7579Module : scheduleTransfer)(
-              safe,
-              transferInputData
-            )
-              .then((txHash) => {
-                setTxHash(txHash);
-                setLoading(false);
-                setRecipient("");
-                setAmount(0);
-                setDate("");
-                setIs7579Installed(true);
-              })
-              .catch((err) => {
-                console.error(err);
-                setLoading(false);
-                setError(true);
-              });
-          }}
-        >
-          Schedule Transfer
-        </button>
+        ERC-7579 module installed:{" "}
+        {is7579Installed
+          ? "Yes ✅"
+          : "No, click on Install Recovery Module to install it!"}
       </div>
-      <div>
-        {loading ? <p>Processing, please wait...</p> : null}
-        {error ? (
-          <p>
+      <div style={{ padding: "0 15px", marginTop: "20px" }}>
+        {loading && (
+          <p style={{ textAlign: "center" }}>Processing, please wait...</p>
+        )}
+        {error && (
+          <p style={{ color: "red", textAlign: "center" }}>
             There was an error processing the transaction. Please try again.
           </p>
-        ) : null}
-        {txHash ? (
-          <>
-            <p>
-              Success!{" "}
-              <a
-                href={`https://sepolia.etherscan.io/tx/${txHash}`}
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  textDecoration: "underline",
-                  fontSize: "14px",
-                }}
-              >
-                View on Etherscan
-              </a>
-            </p>
-          </>
-        ) : null}
+        )}
+        {txHash && (
+          <p style={{ textAlign: "center" }}>
+            Success!{" "}
+            <a
+              href={`https://sepolia.etherscan.io/tx/${txHash}`}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                textDecoration: "underline",
+                color: "blue",
+              }}
+            >
+              View on Etherscan
+            </a>
+          </p>
+        )}
       </div>
-      <button disabled={loading} onClick={handleInstallRecovery}>
-        Install Recovery Module
-      </button>
+      <div style={{ padding: "0 15px", marginTop: "20px" }}>
+        <button
+          style={baseButtonStyle}
+          disabled={loading}
+          onClick={handleInstallRecovery}
+        >
+          Install Recovery Module
+        </button>
+        <button
+          style={baseButtonStyle}
+          disabled={loading}
+          onClick={handleAddSocialSignerGuardian}
+        >
+          Add as Recovery Signer
+        </button>
+        <button
+          style={baseButtonStyle}
+          disabled={loading}
+          onClick={handleInstallRecovery}
+        >
+          Trigger Recovery as Recovery
+        </button>
+      </div>
     </>
   );
 };
