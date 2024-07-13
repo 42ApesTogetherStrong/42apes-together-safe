@@ -6,9 +6,13 @@ import {
 import {
   getInstallSocialRecoveryValidator,
   getAddSocialRecoveryGuardianAction,
+  getSocialRecoveryGuardians,
 } from "@rhinestone/module-sdk";
-import { Address } from "viem";
-import { SafeSmartAccountClient } from "./permissionless";
+import { Address, createPublicClient, http } from "viem";
+import {
+  SafeSmartAccountClient,
+  getSmartAccountClient,
+} from "./permissionless";
 
 export interface ScheduledTransferDataInput {
   startDate: number;
@@ -103,6 +107,7 @@ export const addSocialSignerGuardian = async (
   const addGuardian = getAddSocialRecoveryGuardianAction({
     guardian,
   });
+  safe.transport.timeout = 90000;
 
   const txHash = await safe.sendTransaction({
     to: addGuardian.target,
@@ -115,6 +120,22 @@ export const addSocialSignerGuardian = async (
       txHash
   );
   return txHash;
+};
+
+export const getAllGuardians = async (safe: SafeSmartAccountClient) => {
+  const guardian: Address = "0x2E21f5d32841cf8C7da805185A041400bF15f21A";
+
+  const client = createPublicClient({
+    transport: http(
+      "https://sepolia.gateway.tenderly.co/1YohXAMbTMrav1LUlmSegE"
+    ),
+  });
+
+  console.log(safe.account.address);
+  const muhGuardians = await getSocialRecoveryGuardians(safe.account, client);
+
+  console.log("Successfully fetched the pack!" + muhGuardians);
+  return muhGuardians;
 };
 export const scheduleTransfer = async (
   safe: SafeSmartAccountClient,

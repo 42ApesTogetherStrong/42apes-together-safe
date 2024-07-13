@@ -8,6 +8,7 @@ import {
   recoveryModuleAddress,
   installRecoveryModule,
   addSocialSignerGuardian,
+  getAllGuardians,
 } from "@/lib/scheduledTransfers";
 
 const ScheduledTransferForm: React.FC<{ safe: SafeSmartAccountClient }> = ({
@@ -49,6 +50,24 @@ const ScheduledTransferForm: React.FC<{ safe: SafeSmartAccountClient }> = ({
         safe,
         "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
       );
+      if (newTxHash !== txHash) {
+        setTxHash(newTxHash);
+      }
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setError(true);
+      setLoading(false);
+    }
+  };
+
+  const handleGetAllGuardians = async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const theGuardians = await getAllGuardians(safe);
+      console.log(theGuardians);
+      setLoading(false);
     } catch (err) {
       console.error(err);
       setError(true);
@@ -141,6 +160,13 @@ const ScheduledTransferForm: React.FC<{ safe: SafeSmartAccountClient }> = ({
           onClick={handleInstallRecovery}
         >
           Trigger Recovery as Recovery
+        </button>
+        <button
+          style={baseButtonStyle}
+          disabled={loading}
+          onClick={handleGetAllGuardians}
+        >
+          Get Your Pack Addresses
         </button>
       </div>
     </>
