@@ -7,6 +7,7 @@ import {
   type SafeSmartAccountClient
 } from '../lib/permissionless'
 import ScheduledTransferForm from '../components/ScheduledTransferForm'
+import ObtainWristSignature from '../components/ObtainWristSignature'
 
 export default function Home () {
   const [safe, setSafe] = useState<SafeSmartAccountClient | undefined>()
@@ -25,7 +26,10 @@ export default function Home () {
           </button>
         </>
       ) : (
+        <div>
         <ScheduledTransferForm safe={safe} />
+        <ObtainWristSignature safe={safe} />
+        </div>
       )}
     </>
   )
