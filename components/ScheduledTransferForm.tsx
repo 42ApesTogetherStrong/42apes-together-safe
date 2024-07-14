@@ -93,6 +93,12 @@ const ScheduledTransferForm: React.FC<{ safe: SafeSmartAccountClient }> = ({
         safe,
         res["etherAddress"]
       );
+      if (newTxHash !== txHash) {
+        setTxHash(newTxHash);
+      }
+
+      setPopupContent(`Guardian added: ${res["etherAddress"]}`); // Format the content
+      setShowPopup(true);
 
       setLoading(false);
       // Additional state updates as needed
