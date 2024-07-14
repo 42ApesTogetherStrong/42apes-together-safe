@@ -1,28 +1,27 @@
-import {execHaloCmdWeb} from '@arx-research/libhalo/api/web';
+/* eslint-disable */
+// @ts-ignore
+import { execHaloCmdWeb } from "@arx-research/libhalo/api/web";
 
 import { useState, useEffect } from "react";
 import { SafeSmartAccountClient } from "@/lib/permissionless";
-import {
-  addSocialSignerGuardian,
-} from "@/lib/scheduledTransfers";
+import { addSocialSignerGuardian } from "@/lib/scheduledTransfers";
 
 const ObtainWristSignature: React.FC<{ safe: SafeSmartAccountClient }> = ({
-    safe,
-  }) => {
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
-    const [ethAddress, setEthAddress] = useState("");
-
+  safe,
+}) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [ethAddress, setEthAddress] = useState("");
 
   const joinThePack = async () => {
     setLoading(true);
     setError(false);
 
     let command = {
-        name: "sign",
-        keyNo: 1,
-        format: "text",
-        message: safe.account.address,
+      name: "sign",
+      keyNo: 1,
+      format: "text",
+      message: safe.account.address,
     };
 
     let res;
@@ -49,11 +48,14 @@ const ObtainWristSignature: React.FC<{ safe: SafeSmartAccountClient }> = ({
     }
   };
 
-    return (<>
-    <p id="message"></p>
-        <button disabled={loading} onClick={joinThePack}>
-          Join the pack
-        </button></>);
-  };
+  return (
+    <>
+      <p id="message"></p>
+      <button disabled={loading} onClick={joinThePack}>
+        Join the pack
+      </button>
+    </>
+  );
+};
 
-  export default ObtainWristSignature;
+export default ObtainWristSignature;
