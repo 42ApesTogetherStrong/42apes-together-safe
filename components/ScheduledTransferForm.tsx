@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+/* eslint-disable */
+// @ts-ignore
 import { execHaloCmdWeb } from "@arx-research/libhalo/api/web";
 
 import { SafeSmartAccountClient } from "@/lib/permissionless";
