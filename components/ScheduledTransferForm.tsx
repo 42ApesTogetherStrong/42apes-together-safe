@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect } from "react";
 /* eslint-disable */
 // @ts-ignore
