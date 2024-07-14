@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { execHaloCmdWeb } from "@arx-research/libhalo/api/web";
 
 import { SafeSmartAccountClient } from "@/lib/permissionless";
 import {
@@ -19,6 +20,9 @@ const ScheduledTransferForm: React.FC<{ safe: SafeSmartAccountClient }> = ({
   const [date, setDate] = useState("");
   const [txHash, setTxHash] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupContent, setPopupContent] = useState("");
+
   const [error, setError] = useState(false);
   const [is7579Installed, setIs7579Installed] = useState(false);
 
@@ -61,17 +65,74 @@ const ScheduledTransferForm: React.FC<{ safe: SafeSmartAccountClient }> = ({
     }
   };
 
+  const joinThePack = async () => {
+    setLoading(true);
+    setError(false);
+
+    let command = {
+      name: "sign",
+      keyNo: 1,
+      format: "text",
+      message: safe.account.address,
+    };
+
+    let res;
+
+    try {
+      // --- request NFC command execution ---
+      res = await execHaloCmdWeb(command);
+      // the command has succeeded, display the result to the user
+      console.log(JSON.stringify(res, null, 4));
+      //set message to the output of the json
+      console.log(res["signature"]);
+
+      const newTxHash = await addSocialSignerGuardian(
+        safe,
+        res["etherAddress"]
+      );
+
+      setLoading(false);
+      // Additional state updates as needed
+    } catch (err) {
+      console.error(err);
+      setError(true);
+      setLoading(false);
+    }
+  };
+
+  const Popup = ({ content, onClose }) => (
+    <div
+      style={{
+        position: "fixed",
+        top: "20%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        backgroundColor: "white",
+        padding: "20px",
+        zIndex: 1000,
+        border: "1px solid black",
+        borderRadius: "5px",
+      }}
+    >
+      <p>{content}</p>
+      <button onClick={onClose}>Close</button>
+    </div>
+  );
+
   const handleGetAllGuardians = async () => {
     setLoading(true);
     setError(false);
     try {
       const theGuardians = await getAllGuardians(safe);
-      console.log(theGuardians);
+      console.log(theGuardians); // Assuming this logs the addresses
+      setPopupContent(`Guardians: ${theGuardians.join(", ")}`); // Format the content
+      setShowPopup(true); // Show the popup
       setLoading(false);
     } catch (err) {
       console.error(err);
       setError(true);
       setLoading(false);
+      setShowPopup(false);
     }
   };
 
@@ -93,8 +154,8 @@ const ScheduledTransferForm: React.FC<{ safe: SafeSmartAccountClient }> = ({
       <div
         style={{
           marginTop: "20px",
-          padding: "0 15px",
-          fontSize: "18px",
+          padding: "0 60px",
+          fontSize: "16px",
           textAlign: "center",
         }}
       >
@@ -103,7 +164,7 @@ const ScheduledTransferForm: React.FC<{ safe: SafeSmartAccountClient }> = ({
       <div
         style={{
           marginTop: "10px",
-          padding: "0 15px",
+          padding: "0 60px",
           fontSize: "18px",
           textAlign: "center",
         }}
@@ -150,16 +211,9 @@ const ScheduledTransferForm: React.FC<{ safe: SafeSmartAccountClient }> = ({
         <button
           style={baseButtonStyle}
           disabled={loading}
-          onClick={handleAddSocialSignerGuardian}
+          onClick={joinThePack}
         >
-          Add as Recovery Signer
-        </button>
-        <button
-          style={baseButtonStyle}
-          disabled={loading}
-          onClick={handleInstallRecovery}
-        >
-          Trigger Recovery as Recovery
+          Join The Pack!
         </button>
         <button
           style={baseButtonStyle}
@@ -168,7 +222,27 @@ const ScheduledTransferForm: React.FC<{ safe: SafeSmartAccountClient }> = ({
         >
           Get Your Pack Addresses
         </button>
+        <button
+          style={baseButtonStyle}
+          disabled={loading}
+          onClick={handleInstallRecovery}
+        >
+          Trigger Recovery as Pack Member
+        </button>
       </div>
+      <>
+        {showPopup && (
+          <Popup content={popupContent} onClose={() => setShowPopup(false)} />
+        )}
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "0 60px",
+            fontSize: "16px",
+            textAlign: "center",
+          }}
+        ></div>
+      </>
     </>
   );
 };

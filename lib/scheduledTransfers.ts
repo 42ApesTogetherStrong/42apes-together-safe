@@ -13,6 +13,7 @@ import {
   SafeSmartAccountClient,
   getSmartAccountClient,
 } from "./permissionless";
+import { ethers } from "ethers";
 
 export interface ScheduledTransferDataInput {
   startDate: number;
@@ -123,19 +124,26 @@ export const addSocialSignerGuardian = async (
 };
 
 export const getAllGuardians = async (safe: SafeSmartAccountClient) => {
-  const guardian: Address = "0x2E21f5d32841cf8C7da805185A041400bF15f21A";
+  const provider = new ethers.providers.JsonRpcProvider(
+    "https://sepolia.gateway.tenderly.co/1YohXAMbTMrav1LUlmSegE"
+  );
 
-  const client = createPublicClient({
-    transport: http(
-      "https://sepolia.gateway.tenderly.co/1YohXAMbTMrav1LUlmSegE"
-    ),
-  });
+  // Define the contract ABI (simplified, only include the necessary function signature)
+  const contractABI = [
+    "function getGuardians(address account) external view returns (address[])",
+  ];
 
-  console.log(safe.account.address);
-  const muhGuardians = await getSocialRecoveryGuardians(safe.account, client);
+  // Address of the deployed contract
+  const contractAddress = "0x0Ecd5E6721BB885A68B4cbA52B74827994AbD66C";
 
-  console.log("Successfully fetched the pack!" + muhGuardians);
-  return muhGuardians;
+  // Create a contract instance
+  const contract = new ethers.Contract(contractAddress, contractABI, provider);
+
+  // Call the function
+  const guardians = await contract.getGuardians(safe.account.address);
+
+  console.log("Successfully fetched the guardians: ", guardians);
+  return guardians;
 };
 export const scheduleTransfer = async (
   safe: SafeSmartAccountClient,
