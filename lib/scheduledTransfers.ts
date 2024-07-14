@@ -103,7 +103,9 @@ export const addSocialSignerGuardian = async (
   safe: SafeSmartAccountClient,
   addressToAdd: string
 ) => {
-  const guardian: Address = "0x2E21f5d32841cf8C7da805185A041400bF15f21A";
+  /* eslint-disable */
+  // @ts-ignore
+  const guardian: Address = addressToAdd;
 
   const addGuardian = getAddSocialRecoveryGuardianAction({
     guardian,
