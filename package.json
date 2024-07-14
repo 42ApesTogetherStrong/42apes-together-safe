@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@arx-research/libhalo": "^1.4.3",
-    "@rhinestone/module-sdk": "^0.1.4",
+    "@rhinestone/module-sdk": "0.1.4",
     "crypto-browserify": "^3.12.0",
     "ethers": "5.7.2",
     "next": "14.2.4",
