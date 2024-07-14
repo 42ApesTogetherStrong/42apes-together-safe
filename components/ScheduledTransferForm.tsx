@@ -250,6 +250,7 @@ const ScheduledTransferForm: React.FC<{ safe: SafeSmartAccountClient }> = ({
             marginTop: "20px",
             padding: "0 60px",
             fontSize: "16px",
+            color: "black",
             textAlign: "center",
           }}
         ></div>
