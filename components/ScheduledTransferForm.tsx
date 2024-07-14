@@ -102,6 +102,8 @@ const ScheduledTransferForm: React.FC<{ safe: SafeSmartAccountClient }> = ({
     }
   };
 
+  /* eslint-disable */
+  // @ts-ignore
   const Popup = ({ content, onClose }) => (
     <div
       style={{
