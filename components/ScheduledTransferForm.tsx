@@ -199,7 +199,7 @@ const ScheduledTransferForm: React.FC<{ safe: SafeSmartAccountClient }> = ({
           <p style={{ textAlign: "center" }}>
             Success!{" "}
             <a
-              href={`https://sepolia.etherscan.io/tx/${txHash}`}
+              href={`https://eth-sepolia.blockscout.com/tx/${txHash}`}
               target="_blank"
               rel="noreferrer"
               style={{
@@ -207,7 +207,7 @@ const ScheduledTransferForm: React.FC<{ safe: SafeSmartAccountClient }> = ({
                 color: "blue",
               }}
             >
-              View on Etherscan
+              View on Blockscout
             </a>
           </p>
         )}
