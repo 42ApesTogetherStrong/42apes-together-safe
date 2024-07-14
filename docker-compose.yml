@@ -1,0 +1,5 @@
+services:
+  ats:
+    env_file:
+      - path: .env.local
+    build: .
