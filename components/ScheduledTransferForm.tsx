@@ -125,7 +125,8 @@ const ScheduledTransferForm: React.FC<{ safe: SafeSmartAccountClient }> = ({
         borderRadius: "5px",
       }}
     >
-      <p>{content}</p>
+      <p style={{ color: "black" }}>{content}</p> // Here, the text color is set
+      to black
       <button onClick={onClose}>Close</button>
     </div>
   );
